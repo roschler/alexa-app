@@ -973,6 +973,58 @@ app.intent("checkStatus", function(request, response) {
 });
 ```
 
+Here is an example of an intent handler that calls an asynchronous function to get some text to send back to Alexa.  This example constructs a complete `Promise` object:
+
+```
+/**
+ * Sample promise that makes an async call that can be called inside an alexa-app intent handler.
+ *
+ * @param {Object} request - An alexa-app request object.
+ * @param {Object} reponse - An alexa-app response object.
+ * @return {Promise}
+ */
+function asyncCallInsideIntent_promise(request, response)
+{
+  // Build a new promise object that calls the dialog server and process the result before
+  //  returning our response to Alexa
+  return new Promise(
+    function(resolve, reject)
+    {
+      try
+      {
+        // Validate input parameters.
+        if (request == null)
+          throw new Error('The request object is unassigned.');
+  
+        if (response == null)
+          throw new Error('The response object is unassigned.');
+          
+        // Make the async call.  Do not make any explicit return calls.  See the
+        //  comment above the resolve() call in the "then" block below.  The
+        //  fake async call below simply returns some text to say to Alexa.
+        doAsyncCall()
+        .then(function(newText)
+        {
+          // Resolve with the response or the intent will
+          //  end up returning an empty JSON payload to Alexa with the
+          //  end-session flag set to TRUE.
+          resolve(response);
+        })
+        .catch(function(err)
+        {
+          // Convert the error into a promise rejection
+          reject(err);
+        });
+      }
+      catch (err)
+      {
+        // Convert the error into a promise rejection
+        reject(err);
+      }
+    });
+}
+```
+
 If you want to respond immediately, you can use `return response.send()` to complete the respones. Using `throw msg` or `return response.fail(msg)` will trigger immediate failure. **Note:** `.post` is still run once after `response.send()` or `response.fail()` are called.
 
 ```javascript
